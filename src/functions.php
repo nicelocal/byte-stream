@@ -131,7 +131,6 @@ function getStderr(): WritableResourceStream
 function split(ReadableStream $source, string $delimiter, ?Cancellation $cancellation = null): \Traversable
 {
     $buffer = '';
-    $k = 0;
 
     while (null !== $chunk = $source->read($cancellation)) {
         $buffer .= $chunk;
@@ -139,13 +138,14 @@ function split(ReadableStream $source, string $delimiter, ?Cancellation $cancell
         $split = \explode($delimiter, $buffer);
         $buffer = \array_pop($split);
 
+        // Don't use yield from to avoid reusing the keys from $split
         foreach ($split as $v) {
-            yield $k++ => $v;
+            yield $v;
         }
     }
 
     if ($buffer !== '') {
-        yield $k => $buffer;
+        yield $buffer;
     }
 }
 
